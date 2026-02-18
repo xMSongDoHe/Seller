@@ -8,9 +8,12 @@ interface DataContextType {
   ids: GameID[];
   expenses: Expense[];
   addCategory: (name: string, imageUrl: string) => void;
+  updateCategory: (id: string, name: string, imageUrl: string) => void;
+  deleteCategory: (id: string) => void;
   addID: (idData: Omit<GameID, 'id' | 'dateAdded'>) => void;
   addIDs: (idsData: Omit<GameID, 'id' | 'dateAdded'>[]) => void;
   deleteID: (id: string) => void;
+  bulkDeleteIDs: (idsToDelete: string[]) => void;
   toggleIDStatus: (id: string) => void;
   bulkUpdateIDs: (idsToUpdate: string[], updates: Partial<GameID>) => void;
   addExpense: (title: string, amount: number) => void;
@@ -49,7 +52,29 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addCategory = (name: string, imageUrl: string) => {
     const newCat: Category = { id: Date.now().toString(), name, imageUrl };
-    setCategories([...categories, newCat]);
+    setCategories(prev => [...prev, newCat]);
+  };
+
+  const updateCategory = (id: string, name: string, imageUrl: string) => {
+    setCategories(prev => {
+      const target = prev.find(c => c.id === id);
+      const oldName = target?.name;
+      
+      const nextCategories = prev.map(cat => cat.id === id ? { ...cat, name, imageUrl } : cat);
+      
+      // ถ้าเปลี่ยนชื่อหมวดหมู่ ต้องอัปเดตไอดีที่ใช้ชื่อนั้นด้วย
+      if (oldName && oldName !== name) {
+        setIds(prevIds => prevIds.map(item => item.category === oldName ? { ...item, category: name } : item));
+      }
+      
+      return nextCategories;
+    });
+  };
+
+  const deleteCategory = (id: string) => {
+    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้?')) {
+      setCategories(prev => prev.filter(cat => cat.id !== id));
+    }
   };
 
   const addID = (idData: Omit<GameID, 'id' | 'dateAdded'>) => {
@@ -58,7 +83,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: Date.now().toString(),
       dateAdded: new Date().toISOString().split('T')[0]
     };
-    setIds([...ids, newID]);
+    setIds(prev => [...prev, newID]);
   };
 
   const addIDs = (idsData: Omit<GameID, 'id' | 'dateAdded'>[]) => {
@@ -69,15 +94,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: (now + index).toString(),
       dateAdded: dateStr
     }));
-    setIds([...ids, ...newIDs]);
+    setIds(prev => [...prev, ...newIDs]);
   };
 
   const deleteID = (id: string) => {
-    setIds(ids.filter(item => item.id !== id));
+    setIds(prev => prev.filter(item => item.id !== id));
+  };
+
+  const bulkDeleteIDs = (idsToDelete: string[]) => {
+    setIds(prev => prev.filter(item => !idsToDelete.includes(item.id)));
   };
 
   const toggleIDStatus = (id: string) => {
-    setIds(ids.map(item => 
+    setIds(prev => prev.map(item => 
       item.id === id 
         ? { ...item, status: item.status === IDStatus.SOLD ? IDStatus.AVAILABLE : IDStatus.SOLD } 
         : item
@@ -85,7 +114,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const bulkUpdateIDs = (idsToUpdate: string[], updates: Partial<GameID>) => {
-    setIds(ids.map(item => 
+    setIds(prev => prev.map(item => 
       idsToUpdate.includes(item.id) ? { ...item, ...updates } : item
     ));
   };
@@ -97,17 +126,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       amount,
       date: new Date().toISOString().split('T')[0]
     };
-    setExpenses([...expenses, newExp]);
+    setExpenses(prev => [...prev, newExp]);
   };
 
   const deleteExpense = (id: string) => {
-    setExpenses(expenses.filter(e => e.id !== id));
+    setExpenses(prev => prev.filter(e => e.id !== id));
   };
 
   return (
     <DataContext.Provider value={{ 
       categories, ids, expenses, 
-      addCategory, addID, addIDs, deleteID, toggleIDStatus, bulkUpdateIDs,
+      addCategory, updateCategory, deleteCategory,
+      addID, addIDs, deleteID, bulkDeleteIDs, toggleIDStatus, bulkUpdateIDs,
       addExpense, deleteExpense 
     }}>
       {children}
