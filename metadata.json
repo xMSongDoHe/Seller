@@ -1,0 +1,7 @@
+{
+  "name": "ID Profit Tracker",
+  "description": "ระบบจัดการกำไรจากการขายไอดีเกมที่ทันสมัย พร้อมระบบหมวดหมู่และบันทึกรายจ่าย",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
