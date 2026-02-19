@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Trash2, X, Edit2, Save, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, X, Edit2, Save, Image as ImageIcon, LayoutGrid } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Category } from '../types';
 
@@ -41,30 +41,38 @@ const Management: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-8 animate-in fade-in duration-500">
-      <header className="flex flex-col items-center text-center space-y-4">
-        <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">จัดการหมวดหมู่</h2>
-        <p className="text-slate-400 max-w-lg">เพิ่ม แก้ไข หรือลบหมวดหมู่ไอดีเกมของคุณ เพื่อการจัดระเบียบข้อมูลที่ดียิ่งขึ้น</p>
+    <div className="p-6 space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-800/20 p-8 rounded-[2.5rem] border border-slate-700/50">
+        <div className="flex items-center gap-6">
+          <div className="p-4 bg-lime-400/10 rounded-2xl text-lime-400">
+            <LayoutGrid size={32} />
+          </div>
+          <div>
+            <h2 className="text-3xl font-black bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">Category Management</h2>
+            <p className="text-slate-400 text-sm">จัดการหมวดหมู่ไอดีเกมเพื่อความเป็นระเบียบ</p>
+          </div>
+        </div>
+        
         <button 
           onClick={handleOpenAdd}
-          className="flex items-center gap-2 px-8 py-4 bg-lime-400 text-slate-900 font-bold rounded-2xl hover:bg-lime-300 transition-all shadow-xl shadow-lime-400/20 active:scale-95"
+          className="flex items-center justify-center gap-3 px-8 py-5 bg-lime-400 text-slate-900 font-black rounded-2xl hover:bg-lime-300 transition-all shadow-xl shadow-lime-400/20 active:scale-95 whitespace-nowrap"
         >
-          <Plus size={20} />
+          <Plus size={24} />
           <span>เพิ่มหมวดหมู่ใหม่</span>
         </button>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {categories.map((cat) => (
           <div key={cat.id} className="relative group">
-            <div className="relative w-full aspect-[16/10] rounded-[2rem] overflow-hidden border border-slate-700/50 shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:border-lime-400/30">
+            <div className="relative w-full aspect-[16/10] rounded-[2.5rem] overflow-hidden border border-slate-700/50 shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:border-lime-400/30">
               <img 
                 src={cat.imageUrl} 
                 alt={cat.name} 
                 className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" 
               />
               
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent flex flex-col justify-end p-6">
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent flex flex-col justify-end p-6">
                 <h4 className="text-2xl font-bold text-white text-center mb-2 drop-shadow-lg">{cat.name}</h4>
               </div>
 
@@ -72,14 +80,12 @@ const Management: React.FC = () => {
                 <button 
                   onClick={() => handleOpenEdit(cat)}
                   className="p-3 bg-white/10 backdrop-blur-md text-white rounded-xl hover:bg-lime-400 hover:text-slate-900 transition-all shadow-lg"
-                  title="แก้ไข"
                 >
                   <Edit2 size={18} />
                 </button>
                 <button 
                   onClick={(e) => handleDelete(cat.id, e)}
                   className="p-3 bg-white/10 backdrop-blur-md text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg"
-                  title="ลบ"
                 >
                   <Trash2 size={18} />
                 </button>
