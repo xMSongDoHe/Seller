@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Settings, CreditCard, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Calendar, Settings, CreditCard, Menu, X, Coins } from 'lucide-react';
 import { DataProvider } from './context/DataContext';
 import Home from './pages/Home';
 import Status from './pages/Status';
@@ -9,6 +9,7 @@ import DayDetail from './pages/DayDetail';
 import CategoryDetail from './pages/CategoryDetail';
 import Management from './pages/Management';
 import Expenses from './pages/Expenses';
+import CurrencyConverter from './pages/CurrencyConverter';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -29,6 +30,7 @@ const App: React.FC = () => {
               <SidebarLink to="/status" icon={<Calendar size={20} />} label="STATUS" />
               <SidebarLink to="/management" icon={<Settings size={20} />} label="MANAGE" />
               <SidebarLink to="/expenses" icon={<CreditCard size={20} />} label="EXPENSES" />
+              <SidebarLink to="/converter" icon={<Coins size={20} />} label="CONVERTER" />
             </nav>
           </aside>
 
@@ -51,6 +53,7 @@ const App: React.FC = () => {
                   <SidebarLink to="/status" icon={<Calendar size={20} />} label="STATUS" onClick={() => setIsSidebarOpen(false)} />
                   <SidebarLink to="/management" icon={<Settings size={20} />} label="MANAGE" onClick={() => setIsSidebarOpen(false)} />
                   <SidebarLink to="/expenses" icon={<CreditCard size={20} />} label="EXPENSES" onClick={() => setIsSidebarOpen(false)} />
+                  <SidebarLink to="/converter" icon={<Coins size={20} />} label="CONVERTER" onClick={() => setIsSidebarOpen(false)} />
                 </nav>
               </aside>
             </div>
@@ -65,6 +68,7 @@ const App: React.FC = () => {
               <Route path="/category/:categoryName" element={<CategoryDetail />} />
               <Route path="/management" element={<Management />} />
               <Route path="/expenses" element={<Expenses />} />
+              <Route path="/converter" element={<CurrencyConverter />} />
             </Routes>
           </main>
         </div>
