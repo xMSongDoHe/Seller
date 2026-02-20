@@ -17,6 +17,7 @@ interface DataContextType {
   toggleIDStatus: (id: string) => void;
   bulkUpdateIDs: (idsToUpdate: string[], updates: Partial<GameID>) => void;
   addExpense: (title: string, amount: number) => void;
+  updateExpense: (id: string, title: string, amount: number) => void;
   deleteExpense: (id: string) => void;
 }
 
@@ -59,14 +60,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCategories(prev => {
       const target = prev.find(c => c.id === id);
       const oldName = target?.name;
-      
       const nextCategories = prev.map(cat => cat.id === id ? { ...cat, name, imageUrl } : cat);
-      
-      // ถ้าเปลี่ยนชื่อหมวดหมู่ ต้องอัปเดตไอดีที่ใช้ชื่อนั้นด้วย
       if (oldName && oldName !== name) {
         setIds(prevIds => prevIds.map(item => item.category === oldName ? { ...item, category: name } : item));
       }
-      
       return nextCategories;
     });
   };
@@ -129,8 +126,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setExpenses(prev => [...prev, newExp]);
   };
 
+  const updateExpense = (id: string, title: string, amount: number) => {
+    setExpenses(prev => prev.map(e => e.id === id ? { ...e, title, amount } : e));
+  };
+
   const deleteExpense = (id: string) => {
-    setExpenses(prev => prev.filter(e => e.id !== id));
+    if (window.confirm('ลบรายการรายจ่ายนี้?')) {
+      setExpenses(prev => prev.filter(e => e.id !== id));
+    }
   };
 
   return (
@@ -138,7 +141,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       categories, ids, expenses, 
       addCategory, updateCategory, deleteCategory,
       addID, addIDs, deleteID, bulkDeleteIDs, toggleIDStatus, bulkUpdateIDs,
-      addExpense, deleteExpense 
+      addExpense, updateExpense, deleteExpense 
     }}>
       {children}
     </DataContext.Provider>

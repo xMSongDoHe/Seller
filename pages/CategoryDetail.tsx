@@ -8,7 +8,7 @@ import { IDStatus, GameID } from '../types';
 const CategoryDetail: React.FC = () => {
   const { categoryName } = useParams();
   const navigate = useNavigate();
-  const { ids, categories, deleteID, toggleIDStatus, bulkUpdateIDs } = useData();
+  const { ids, categories, deleteID, bulkDeleteIDs, toggleIDStatus, bulkUpdateIDs } = useData();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -38,8 +38,9 @@ const CategoryDetail: React.FC = () => {
   };
 
   const handleBulkDelete = () => {
-    if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบ ${selectedIds.length} รายการนี้?`)) {
-      selectedIds.forEach(id => deleteID(id));
+    if (selectedIds.length === 0) return;
+    if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบ ${selectedIds.length} รายการที่เลือกนี้อย่างถาวร?`)) {
+      bulkDeleteIDs(selectedIds);
       setSelectedIds([]);
     }
   };
@@ -70,12 +71,12 @@ const CategoryDetail: React.FC = () => {
           <h2 className="text-3xl font-bold">หมวดหมู่: {categoryName}</h2>
         </div>
         <div className="flex flex-col md:flex-row justify-between gap-4">
-           <div className="flex items-center gap-2 bg-slate-800 p-2 rounded-xl border border-slate-700 w-full md:w-64">
+           <div className="flex items-center gap-2 bg-slate-800 p-2 rounded-xl border border-slate-700 w-full md:w-64 focus-within:border-emerald-500/50 transition-all">
               <Search size={18} className="text-slate-500 ml-2" />
-              <input type="text" placeholder="ค้นหาไอดี..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent border-none text-sm w-full focus:outline-none" />
+              <input type="text" placeholder="ค้นหาไอดี..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent border-none text-sm w-full focus:outline-none text-slate-200" />
            </div>
-           <div className="text-sm text-slate-500">
-             พบทั้งหมด {filteredIDs.length} ไอดี
+           <div className="text-sm text-slate-500 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+             พบทั้งหมด <span className="text-emerald-400 font-bold">{filteredIDs.length}</span> ไอดี
            </div>
         </div>
       </div>
@@ -90,39 +91,44 @@ const CategoryDetail: React.FC = () => {
                     type="checkbox" 
                     checked={filteredIDs.length > 0 && selectedIds.length === filteredIDs.length}
                     onChange={toggleSelectAll}
-                    className="rounded border-slate-600 bg-slate-800 text-emerald-500" 
+                    className="rounded border-slate-600 bg-slate-800 text-emerald-500 w-4 h-4" 
                   />
                 </th>
-                <th className="p-4 text-xs font-semibold text-slate-500 uppercase">ชื่อไอดี</th>
-                <th className="p-4 text-xs font-semibold text-slate-500 uppercase">กำไร</th>
-                <th className="p-4 text-xs font-semibold text-slate-500 uppercase">รายละเอียด</th>
-                <th className="p-4 text-xs font-semibold text-slate-500 uppercase">สถานะ</th>
-                <th className="p-4 text-xs font-semibold text-slate-500 uppercase text-center">การจัดการ</th>
+                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">ชื่อไอดี</th>
+                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">กำไร</th>
+                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">รายละเอียด</th>
+                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">สถานะ</th>
+                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">การจัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/50">
               {filteredIDs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-10 text-center text-slate-500 italic">ไม่พบข้อมูลไอดีในหมวดหมู่นี้</td>
+                  <td colSpan={6} className="p-16 text-center text-slate-500 italic">
+                    <div className="flex flex-col items-center gap-2 opacity-50">
+                      <Search size={40} />
+                      <p>ไม่พบข้อมูลไอดีในหมวดหมู่นี้</p>
+                    </div>
+                  </td>
                 </tr>
               ) : (
                 filteredIDs.map((item) => (
                   <tr key={item.id} className={`hover:bg-slate-800/50 transition-colors ${selectedIds.includes(item.id) ? 'bg-emerald-500/10' : ''}`}>
                     <td className="p-4 text-center">
-                      <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} className="rounded border-slate-600 bg-slate-800 text-emerald-500" />
+                      <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} className="rounded border-slate-600 bg-slate-800 text-emerald-500 w-4 h-4" />
                     </td>
                     <td className="p-4 font-mono text-sm text-slate-200">{item.name}</td>
                     <td className="p-4 font-bold text-emerald-400">฿ {item.profit.toLocaleString()}</td>
                     <td className="p-4 text-sm text-slate-400">{item.details || '-'}</td>
                     <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${item.status === IDStatus.SOLD ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-slate-700/50 text-slate-400 border border-slate-600/50'}`}>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-widest ${item.status === IDStatus.SOLD ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-slate-700/50 text-slate-400 border border-slate-600/50'}`}>
                         {item.status === IDStatus.SOLD ? 'SOLD' : 'AVAILABLE'}
                       </span>
                     </td>
                     <td className="p-4">
                       <div className="flex gap-4 justify-center">
-                         <button title="สลับสถานะ" onClick={() => toggleIDStatus(item.id)} className="text-slate-500 hover:text-emerald-400 transition-colors"><CheckCircle size={18} /></button>
-                         <button title="ลบ" onClick={() => deleteID(item.id)} className="text-slate-500 hover:text-red-400 transition-colors"><Trash2 size={18} /></button>
+                         <button title="สลับสถานะ" onClick={() => toggleIDStatus(item.id)} className="text-slate-500 hover:text-emerald-400 transition-colors p-1"><CheckCircle size={18} /></button>
+                         <button title="ลบ" onClick={() => { if(window.confirm('ลบรายการนี้?')) deleteID(item.id) }} className="text-slate-500 hover:text-red-400 transition-colors p-1"><Trash2 size={18} /></button>
                       </div>
                     </td>
                   </tr>
@@ -144,15 +150,15 @@ const CategoryDetail: React.FC = () => {
           <div className="flex items-center gap-8">
              <button onClick={() => setIsEditModalOpen(true)} className="flex items-center gap-2 text-slate-200 hover:text-emerald-400 font-semibold transition-all group">
                <div className="p-2 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20"><Edit3 size={18} /></div>
-               <span>แก้ไขที่เลือก</span>
+               <span className="hidden sm:inline">แก้ไขที่เลือก</span>
              </button>
              <button onClick={handleBulkToggle} className="flex items-center gap-2 text-slate-200 hover:text-blue-400 font-semibold transition-all group">
                <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20"><CheckCircle size={18} /></div>
-               <span>สลับสถานะ</span>
+               <span className="hidden sm:inline">สลับสถานะ</span>
              </button>
              <button onClick={handleBulkDelete} className="flex items-center gap-2 text-red-400 hover:text-red-300 font-semibold transition-all group">
                <div className="p-2 rounded-lg bg-red-500/10 group-hover:bg-red-500/20"><Trash2 size={18} /></div>
-               <span>ลบทิ้ง</span>
+               <span className="hidden sm:inline">ลบทิ้ง</span>
              </button>
              <button onClick={() => setSelectedIds([])} className="text-slate-500 hover:text-white ml-2 transition-colors"><XCircle size={24} /></button>
           </div>
@@ -221,7 +227,7 @@ const CategoryDetail: React.FC = () => {
               <div className="pt-4 flex gap-4">
                 <button 
                   onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 bg-slate-700 text-slate-300 font-bold py-4 rounded-xl hover:bg-slate-600 transition-all"
+                  className="flex-1 bg-slate-700 text-slate-300 font-bold py-4 rounded-xl hover:bg-slate-600 transition-all active:scale-95"
                 >
                   ยกเลิก
                 </button>
